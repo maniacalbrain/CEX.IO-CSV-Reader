@@ -16,6 +16,7 @@ public class CsvTest {
 	public BigDecimal btcMaintenance = new BigDecimal(0); 	//Variable to hold maintenance value
 	
 	String date = "";										//Variable to hold date while parsing through csv
+	private String tempDate;
 	//ArrayList<String> dateList;
 
 	
@@ -36,14 +37,15 @@ public class CsvTest {
 		btcMaintenanceMap = new TreeMap<String, BigDecimal>();
 		
 		try(BufferedReader br = new BufferedReader(new FileReader(csv))){
+			br.readLine();
 			while((line = br.readLine()) != null){
 				String[] cex = line.split(cvsSplitBy);		//Split line based on position of commas
 				
 
-				if(cex[0].equals("DateUTC")){
+				/*if(cex[0].equals("DateUTC")){
 					continue;								//Skip the first line of .CSV file
-				}
-				String tempDate = cex[0].substring(0, 10);	//tempDate holds figure to compare it to the currently assigned date
+				}*/
+				tempDate = cex[0].substring(0, 10);	//tempDate holds figure to compare it to the currently assigned date
 					if(date.equals("")){ 					//If date is unassigned, assign what is in tempDate, happens first time through loop
 						date=tempDate;
 						
@@ -53,13 +55,7 @@ public class CsvTest {
 					
 					}						
 					else {										//If tempDate represents a new days figures
-						btcMiningMap.put(date, btcMining);		//put the previous days date and the mining figure into Mining TreeMap
-						btcMining = BigDecimal.ZERO;			//set mining value to 0
-						
-						btcMaintenanceMap.put(date, btcMaintenance); //put the previous days date and maintenance figure into Maintenance TreeMap
-						btcMaintenance = BigDecimal.ZERO;			//set maintenance value to 0
-						
-						date=tempDate;								//set date to the new date	
+						addDate();
 						
 						
 					}
@@ -77,16 +73,14 @@ public class CsvTest {
 					}
 					
 			}
-			btcMiningMap.put(date, btcMining); //When the loop ends the last date and figues will not have been put into TreeMaps, this is done below (replace with method when this becomes longer)
-			btcMining = BigDecimal.ZERO;
-			
-			btcMaintenanceMap.put(date, btcMaintenance);
-			btcMaintenance = BigDecimal.ZERO;	
 			
 		}catch(FileNotFoundException fnfe){
 			fnfe.printStackTrace();
 		}catch(IOException ioe){
 			ioe.printStackTrace();
+		}finally{
+			//call addDate() to add the last date and value
+			addDate();
 		}
 		
 
@@ -107,5 +101,17 @@ public class CsvTest {
 		}
 		System.out.println(btcMiningMap.get("2014-05-17"));
 		System.out.println(btcMaintenanceMap.get("2014-05-17"));
+	}
+	
+	
+	public void addDate(){
+		btcMiningMap.put(date, btcMining);		//put the previous days date and the mining figure into Mining TreeMap
+		btcMining = BigDecimal.ZERO;			//set mining value to 0
+		
+		btcMaintenanceMap.put(date, btcMaintenance); //put the previous days date and maintenance figure into Maintenance TreeMap
+		btcMaintenance = BigDecimal.ZERO;			//set maintenance value to 0
+		
+		date=tempDate;								//set date to the new date	
+		
 	}
 }
